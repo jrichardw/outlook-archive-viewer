@@ -16,7 +16,11 @@ function App() {
   const [msgLoading, setMsgLoading] = useState(false);
   const [msgProgress, setMsgProgress] = useState(0);
   const [hasSavedPST, setHasSavedPST] = useState(false);
-  const [showLandingPage, setShowLandingPage] = useState(false);
+  // Use sessionStorage to persist across refreshes but not browser closes
+  const [showLandingPage, setShowLandingPage] = useState(() => {
+    const saved = sessionStorage.getItem('showLandingPage');
+    return saved === 'true';
+  });
   const {
     fileId,
     pstInfo,
@@ -52,6 +56,11 @@ function App() {
     const savedState = localStorage.getItem('outlook-archive-viewer-pst-state');
     setHasSavedPST(!!savedState);
   }, [fileId]);
+
+  // Persist showLandingPage to sessionStorage
+  useEffect(() => {
+    sessionStorage.setItem('showLandingPage', showLandingPage.toString());
+  }, [showLandingPage]);
 
   const handleUpload = async (file) => {
     try {

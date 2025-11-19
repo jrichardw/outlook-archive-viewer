@@ -8,8 +8,11 @@
   /* Modern color palette */
   --primary-color: #0078d4;
   --primary-hover: #106ebe;
+  --primary-dark: #005a9e;
   --primary-light: #e6f2ff;
+  --accent-color: #6366f1;
   --secondary-color: #50e3c2;
+  --success-color: #28a745;
   --background: #f5f7fa;
   --surface: #ffffff;
   --surface-hover: #f8f9fa;
