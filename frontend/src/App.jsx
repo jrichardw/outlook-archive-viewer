@@ -246,6 +246,16 @@ function App() {
             onSortChange={handleSortChange}
           />
 
+          {/* Pagination controls */}
+          {emails.length > 0 && (
+            <Pagination
+              pagination={pagination}
+              onPageChange={changePage}
+              onPageSizeChange={changePageSize}
+              loading={loading}
+            />
+          )}
+
           {/* Content area with email list and viewer */}
           <div className="app-content">
             {/* Email list */}
@@ -257,16 +267,6 @@ function App() {
                 loading={loading}
                 currentFolder={selectedFolderName}
               />
-
-              {/* Pagination controls */}
-              {emails.length > 0 && (
-                <Pagination
-                  pagination={pagination}
-                  onPageChange={changePage}
-                  onPageSizeChange={changePageSize}
-                  loading={loading}
-                />
-              )}
             </div>
 
             {/* Email viewer */}
