@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePST } from './hooks/usePST';
 import LandingPage from './components/LandingPage';
 import AdvancedSearch from './components/AdvancedSearch';
@@ -8,13 +8,14 @@ import EmailList from './components/EmailList';
 import EmailViewer from './components/EmailViewer';
 import Pagination from './components/Pagination';
 import { msgApi } from './services/api';
-import { AlertCircle, X, FileText, Mail, Home } from 'lucide-react';
+import { AlertCircle, X, FileText, Mail, ArrowLeft } from 'lucide-react';
 import './App.css';
 
 function App() {
   const [msgEmail, setMsgEmail] = useState(null);
   const [msgLoading, setMsgLoading] = useState(false);
   const [msgProgress, setMsgProgress] = useState(0);
+  const [hasSavedPST, setHasSavedPST] = useState(false);
   const {
     fileId,
     pstInfo,
@@ -44,6 +45,12 @@ function App() {
   const [selectedFolderName, setSelectedFolderName] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [showEmailViewer, setShowEmailViewer] = useState(false);
+
+  // Check if there's a saved PST in localStorage
+  useEffect(() => {
+    const savedState = localStorage.getItem('outlook-archive-viewer-pst-state');
+    setHasSavedPST(!!savedState);
+  }, [fileId]);
 
   const handleUpload = async (file) => {
     try {
@@ -113,6 +120,13 @@ function App() {
   const handleReturnHome = () => {
     closePST();
     setMsgEmail(null);
+    setHasSavedPST(false);
+  };
+
+  const handleGoToExistingPST = () => {
+    // The usePST hook will automatically restore the PST from localStorage
+    // We just need to trigger a reload by setting a flag or refreshing
+    window.location.reload();
   };
 
   // Show MSG viewer if MSG file is loaded
@@ -122,7 +136,7 @@ function App() {
         <div className="msg-viewer-container">
           <div className="msg-viewer-header">
             <button className="btn-home" onClick={handleReturnHome}>
-              <Home size={20} />
+              <ArrowLeft size={20} />
               Return Home
             </button>
             <h2>MSG File Viewer</h2>
@@ -139,8 +153,10 @@ function App() {
       <LandingPage
         onOpenPST={handleUpload}
         onOpenMSG={handleOpenMSG}
+        onGoToExistingPST={handleGoToExistingPST}
         uploading={uploading || msgLoading}
         progress={uploading ? uploadProgress : msgProgress}
+        hasSavedPST={hasSavedPST}
       />
     );
   }
@@ -190,9 +206,9 @@ function App() {
                 )}
               </div>
             </div>
-            <button className="btn-close-archive" onClick={handleReturnHome} title="Close archive and return home">
-              <Home size={18} />
-              Close Archive
+            <button className="btn-close-archive" onClick={handleReturnHome} title="Return to home">
+              <ArrowLeft size={18} />
+              Return Home
             </button>
           </div>
 

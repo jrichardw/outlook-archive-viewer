@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Archive, FileText, Upload, Search, SortAsc, FolderOpen, CheckCircle } from 'lucide-react';
+import { Archive, FileText, Upload, Search, SortAsc, FolderOpen, CheckCircle, ArrowRight } from 'lucide-react';
 import './LandingPage.css';
 
-export default function LandingPage({ onOpenPST, onOpenMSG, uploading, progress }) {
+export default function LandingPage({ onOpenPST, onOpenMSG, onGoToExistingPST, uploading, progress, hasSavedPST }) {
   const [dragOver, setDragOver] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
 
@@ -145,16 +145,23 @@ export default function LandingPage({ onOpenPST, onOpenMSG, uploading, progress 
               <li><CheckCircle size={16} /> Advanced search & filters</li>
               <li><CheckCircle size={16} /> Persistent state across refreshes</li>
             </ul>
-            <label className="action-button action-button-primary">
-              <Upload size={20} />
-              Select PST File
-              <input
-                type="file"
-                accept=".pst"
-                onChange={handlePSTFileSelect}
-                style={{ display: 'none' }}
-              />
-            </label>
+            {hasSavedPST ? (
+              <button className="action-button action-button-primary" onClick={onGoToExistingPST}>
+                <ArrowRight size={20} />
+                Go to PST Archive
+              </button>
+            ) : (
+              <label className="action-button action-button-primary">
+                <Upload size={20} />
+                Select PST File
+                <input
+                  type="file"
+                  accept=".pst"
+                  onChange={handlePSTFileSelect}
+                  style={{ display: 'none' }}
+                />
+              </label>
+            )}
           </div>
 
           {/* MSG File Card */}
