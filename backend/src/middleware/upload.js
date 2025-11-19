@@ -2,6 +2,7 @@ import multer from 'multer';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import config from '../config/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -27,12 +28,17 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// Calculate file size limit (0 = unlimited)
+const fileSizeLimit = config.maxFileSizeMB === 0
+  ? Infinity
+  : config.maxFileSizeMB * 1024 * 1024;
+
 // Configure multer
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: 500 * 1024 * 1024 // 500MB max file size
+    fileSize: fileSizeLimit
   }
 });
 

@@ -6,7 +6,7 @@ A modern, full-stack web application for viewing and managing Outlook PST (Perso
 
 ## ✨ Features
 
-- **PST File Upload**: Drag-and-drop or browse to upload PST files (up to 500MB)
+- **PST File Upload**: Drag-and-drop or browse to upload PST files (configurable size limit, unlimited by default)
 - **Folder Navigation**: Browse your email folder structure with expandable tree view
 - **Email Viewer**: Read emails with full HTML rendering support
 - **Search Functionality**: Search across all emails by subject, sender, or content
@@ -41,6 +41,54 @@ A modern, full-stack web application for viewing and managing Outlook PST (Perso
    cd ../frontend
    npm install
    ```
+
+### Configuration
+
+The application supports configuration through environment variables.
+
+#### Backend Configuration
+
+Create a `.env` file in the `backend/` directory (or use environment variables):
+
+```bash
+# Copy the example file
+cd backend
+cp .env.example .env
+```
+
+Available options:
+- `PORT` - Server port (default: 3001)
+- `MAX_FILE_SIZE_MB` - Maximum PST file size in MB. Set to `0` for unlimited (default: 0)
+- `UPLOAD_DIR` - Directory for temporary file uploads (default: ./uploads)
+
+Example `.env` file:
+```bash
+PORT=3001
+MAX_FILE_SIZE_MB=0        # 0 = unlimited (supports large files like 3.55GB+)
+UPLOAD_DIR=./uploads
+```
+
+#### Frontend Configuration
+
+Create a `.env` file in the `frontend/` directory (optional):
+
+```bash
+# Copy the example file
+cd frontend
+cp .env.example .env
+```
+
+Available options:
+- `VITE_MAX_FILE_SIZE_MB` - Display max file size hint. Set to `0` for unlimited (default: 0)
+- `VITE_API_URL` - Backend API URL (default: http://localhost:3001)
+
+Example `.env` file:
+```bash
+VITE_MAX_FILE_SIZE_MB=0   # 0 = unlimited, displays "No file size limit"
+VITE_API_URL=http://localhost:3001
+```
+
+**Note**: For large PST files (3GB+), keep `MAX_FILE_SIZE_MB=0` to allow unlimited file uploads.
 
 ### Running the Application
 
@@ -136,8 +184,8 @@ outlook-archive-viewer/
 ## 🔒 Security Considerations
 
 - File type validation (only .pst files accepted)
-- File size limits (500MB maximum)
-- Uploaded files are deleted after processing
+- Configurable file size limits (unlimited by default, can be restricted via config)
+- Uploaded files are deleted after processing to save disk space
 - Input sanitization for search queries
 - CORS configuration for API access
 

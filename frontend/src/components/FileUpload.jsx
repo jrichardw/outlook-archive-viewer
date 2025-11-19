@@ -7,6 +7,9 @@ export default function FileUpload({ onUpload, uploading, progress }) {
   const [error, setError] = useState('');
   const fileInputRef = useRef(null);
 
+  // Get max file size from env (0 = unlimited)
+  const maxFileSizeMB = import.meta.env.VITE_MAX_FILE_SIZE_MB || 0;
+
   const handleDrag = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -45,11 +48,13 @@ export default function FileUpload({ onUpload, uploading, progress }) {
         return;
       }
 
-      // Validate file size (max 500MB)
-      const maxSize = 500 * 1024 * 1024;
-      if (file.size > maxSize) {
-        setError('File size exceeds 500MB limit');
-        return;
+      // Validate file size if limit is set (0 = unlimited)
+      if (maxFileSizeMB > 0) {
+        const maxSize = maxFileSizeMB * 1024 * 1024;
+        if (file.size > maxSize) {
+          setError(`File size exceeds ${maxFileSizeMB}MB limit`);
+          return;
+        }
       }
 
       onUpload(file);
@@ -104,7 +109,11 @@ export default function FileUpload({ onUpload, uploading, progress }) {
               >
                 Choose File
               </button>
-              <p className="upload-hint">Maximum file size: 500MB</p>
+              <p className="upload-hint">
+                {maxFileSizeMB > 0
+                  ? `Maximum file size: ${maxFileSizeMB}MB`
+                  : 'No file size limit'}
+              </p>
             </div>
           ) : (
             <div className="upload-progress">

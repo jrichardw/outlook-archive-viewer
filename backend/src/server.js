@@ -5,12 +5,13 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
 import pstRoutes from './routes/pst.routes.js';
+import config from './config/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = config.port;
 
 // Middleware
 app.use(cors());
@@ -43,4 +44,5 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   console.log(`📧 Outlook Archive Viewer API ready`);
+  console.log(`📁 Max file size: ${config.maxFileSizeMB === 0 ? 'Unlimited' : config.maxFileSizeMB + 'MB'}`);
 });
