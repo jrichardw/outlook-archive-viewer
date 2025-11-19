@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
-import { X, Mail, Calendar, User, Paperclip, Download, Clock } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { X, Mail, Calendar, User, Paperclip, Download, Clock, ChevronDown, ChevronUp } from 'lucide-react';
 import { format, parseISO, isValid } from 'date-fns';
 import './EmailViewer.css';
 
 export default function EmailViewer({ email, onClose }) {
+  const [attachmentsExpanded, setAttachmentsExpanded] = useState(false);
   const formatDateTime = (dateString) => {
     if (!dateString) return 'Unknown';
     try {
@@ -85,22 +86,29 @@ export default function EmailViewer({ email, onClose }) {
 
           {email.hasAttachments && email.attachments && email.attachments.length > 0 && (
             <div className="email-attachments">
-              <div className="attachments-header">
+              <div
+                className="attachments-header"
+                onClick={() => setAttachmentsExpanded(!attachmentsExpanded)}
+                style={{ cursor: 'pointer' }}
+              >
                 <Paperclip size={16} />
                 <span>{email.attachments.length} Attachment{email.attachments.length !== 1 ? 's' : ''}</span>
+                {attachmentsExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </div>
-              <div className="attachments-list">
-                {email.attachments.map((attachment, index) => (
-                  <div key={index} className="attachment-item">
-                    <div className="attachment-info">
-                      <span className="attachment-name">{attachment.filename}</span>
-                      <span className="attachment-size">
-                        {(attachment.size / 1024).toFixed(1)} KB
-                      </span>
+              {attachmentsExpanded && (
+                <div className="attachments-list">
+                  {email.attachments.map((attachment, index) => (
+                    <div key={index} className="attachment-item">
+                      <div className="attachment-info">
+                        <span className="attachment-name">{attachment.filename}</span>
+                        <span className="attachment-size">
+                          {(attachment.size / 1024).toFixed(1)} KB
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
