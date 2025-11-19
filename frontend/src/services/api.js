@@ -67,4 +67,29 @@ export const pstApi = {
   }
 };
 
+export const msgApi = {
+  /**
+   * Upload and parse MSG file
+   */
+  uploadMSG: async (file, onProgress) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await api.post('/msg/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      timeout: 60000, // 1 minute timeout for MSG files
+      onUploadProgress: (progressEvent) => {
+        if (onProgress && progressEvent.total) {
+          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          onProgress(progress);
+        }
+      }
+    });
+
+    return response.data;
+  }
+};
+
 export default api;

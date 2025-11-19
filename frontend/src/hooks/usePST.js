@@ -1,5 +1,7 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { pstApi } from '../services/api';
+
+const PST_STORAGE_KEY = 'outlook-archive-viewer-pst-state';
 
 export function usePST() {
   const [fileId, setFileId] = useState(null);
@@ -30,6 +32,94 @@ export function usePST() {
     limit: 50,
     totalPages: 0
   });
+
+  // Restore state from localStorage on mount
+  useEffect(() => {
+    const restoreState = async () => {
+      try {
+        const savedState = localStorage.getItem(PST_STORAGE_KEY);
+        if (!savedState) return;
+
+        const state = JSON.parse(savedState);
+
+        // Verify the PST file is still available on the backend
+        if (state.fileId) {
+          try {
+            const foldersData = await pstApi.getFolders(state.fileId);
+
+            // Successfully retrieved folders, restore full state
+            setFileId(state.fileId);
+            setPstInfo(state.pstInfo);
+            setFolders(foldersData.folders);
+            setCurrentFilters(state.currentFilters || {
+              folderId: null,
+              search: '',
+              from: '',
+              to: '',
+              subject: '',
+              body: '',
+              hasAttachments: null
+            });
+            setCurrentSort(state.currentSort || {
+              sortBy: 'date',
+              sortDirection: 'newest'
+            });
+            setPagination(state.pagination || {
+              total: 0,
+              page: 1,
+              limit: 50,
+              totalPages: 0
+            });
+
+            // Load emails with restored filters
+            const params = {
+              page: state.pagination?.page || 1,
+              limit: state.pagination?.limit || 50,
+              sortBy: state.currentSort?.sortBy || 'date',
+              sortDirection: state.currentSort?.sortDirection || 'newest'
+            };
+
+            if (state.currentFilters?.folderId) params.folderId = state.currentFilters.folderId;
+            if (state.currentFilters?.search) params.search = state.currentFilters.search;
+            if (state.currentFilters?.from) params.from = state.currentFilters.from;
+            if (state.currentFilters?.to) params.to = state.currentFilters.to;
+            if (state.currentFilters?.subject) params.subject = state.currentFilters.subject;
+            if (state.currentFilters?.body) params.body = state.currentFilters.body;
+            if (state.currentFilters?.hasAttachments !== null) {
+              params.hasAttachments = state.currentFilters.hasAttachments;
+            }
+
+            const emailsData = await pstApi.getEmails(state.fileId, params);
+            setEmails(emailsData.emails);
+            setPagination(emailsData.pagination);
+          } catch (err) {
+            // PST file no longer available on backend, clear storage
+            console.log('Saved PST file no longer available, clearing storage');
+            localStorage.removeItem(PST_STORAGE_KEY);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to restore PST state:', err);
+        localStorage.removeItem(PST_STORAGE_KEY);
+      }
+    };
+
+    restoreState();
+  }, []);
+
+  // Save state to localStorage whenever key state changes
+  useEffect(() => {
+    if (fileId && pstInfo) {
+      const state = {
+        fileId,
+        pstInfo,
+        currentFilters,
+        currentSort,
+        pagination
+      };
+      localStorage.setItem(PST_STORAGE_KEY, JSON.stringify(state));
+    }
+  }, [fileId, pstInfo, currentFilters, currentSort, pagination]);
 
   const uploadPST = useCallback(async (file) => {
     try {
@@ -291,6 +381,34 @@ export function usePST() {
     setError(null);
   }, []);
 
+  const closePST = useCallback(() => {
+    setFileId(null);
+    setPstInfo(null);
+    setFolders([]);
+    setEmails([]);
+    setCurrentEmail(null);
+    setCurrentFilters({
+      folderId: null,
+      search: '',
+      from: '',
+      to: '',
+      subject: '',
+      body: '',
+      hasAttachments: null
+    });
+    setCurrentSort({
+      sortBy: 'date',
+      sortDirection: 'newest'
+    });
+    setPagination({
+      total: 0,
+      page: 1,
+      limit: 50,
+      totalPages: 0
+    });
+    localStorage.removeItem(PST_STORAGE_KEY);
+  }, []);
+
   return {
     fileId,
     pstInfo,
@@ -312,6 +430,7 @@ export function usePST() {
     changePageSize,
     changeSort,
     clearError,
-    setCurrentEmail
+    setCurrentEmail,
+    closePST
   };
 }

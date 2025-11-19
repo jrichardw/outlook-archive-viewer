@@ -69,6 +69,7 @@
 .pst-info-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
   padding: 16px 20px;
   background: var(--surface);
@@ -76,7 +77,15 @@
   color: var(--text-secondary);
 }
 
-.pst-info-header svg {
+.pst-info-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.pst-info-left svg {
   flex-shrink: 0;
   color: var(--primary-color);
 }
@@ -107,6 +116,59 @@
 
 .pst-stats svg {
   flex-shrink: 0;
+}
+
+.btn-close-archive,
+.btn-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--surface);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-close-archive:hover,
+.btn-home:hover {
+  background: var(--background);
+  color: var(--text-primary);
+  border-color: var(--primary-color);
+}
+
+.btn-close-archive svg,
+.btn-home svg {
+  flex-shrink: 0;
+}
+
+/* MSG Viewer Container */
+.msg-viewer-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.msg-viewer-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 24px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.msg-viewer-header h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
 }
 
 .app-content {

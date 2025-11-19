@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { usePST } from './hooks/usePST';
-import FileUpload from './components/FileUpload';
+import LandingPage from './components/LandingPage';
 import AdvancedSearch from './components/AdvancedSearch';
 import SortControls from './components/SortControls';
 import FolderTree from './components/FolderTree';
 import EmailList from './components/EmailList';
 import EmailViewer from './components/EmailViewer';
 import Pagination from './components/Pagination';
-import { AlertCircle, X, FileText, Mail } from 'lucide-react';
+import { msgApi } from './services/api';
+import { AlertCircle, X, FileText, Mail, Home } from 'lucide-react';
 import './App.css';
 
 function App() {
+  const [msgEmail, setMsgEmail] = useState(null);
+  const [msgLoading, setMsgLoading] = useState(false);
+  const [msgProgress, setMsgProgress] = useState(0);
   const {
     fileId,
     pstInfo,
@@ -32,7 +36,8 @@ function App() {
     changePageSize,
     changeSort,
     clearError,
-    setCurrentEmail
+    setCurrentEmail,
+    closePST
   } = usePST();
 
   const [selectedFolderId, setSelectedFolderId] = useState(null);
@@ -82,13 +87,60 @@ function App() {
     setCurrentEmail(null);
   };
 
-  // Show upload screen if no file is loaded
+  const handleOpenMSG = async (file) => {
+    try {
+      setMsgLoading(true);
+      setMsgProgress(0);
+
+      const result = await msgApi.uploadMSG(file, (progress) => {
+        setMsgProgress(progress);
+      });
+
+      setMsgEmail(result.email);
+      setMsgLoading(false);
+    } catch (err) {
+      console.error('Failed to open MSG file:', err);
+      alert(`Failed to open MSG file: ${err.response?.data?.error || err.message}`);
+      setMsgLoading(false);
+      setMsgEmail(null);
+    }
+  };
+
+  const handleCloseMSG = () => {
+    setMsgEmail(null);
+  };
+
+  const handleReturnHome = () => {
+    closePST();
+    setMsgEmail(null);
+  };
+
+  // Show MSG viewer if MSG file is loaded
+  if (msgEmail) {
+    return (
+      <div className="app">
+        <div className="msg-viewer-container">
+          <div className="msg-viewer-header">
+            <button className="btn-home" onClick={handleReturnHome}>
+              <Home size={20} />
+              Return Home
+            </button>
+            <h2>MSG File Viewer</h2>
+          </div>
+          <EmailViewer email={msgEmail} onClose={handleCloseMSG} />
+        </div>
+      </div>
+    );
+  }
+
+  // Show landing page if no file is loaded
   if (!fileId) {
     return (
-      <FileUpload
-        onUpload={handleUpload}
-        uploading={uploading}
-        progress={uploadProgress}
+      <LandingPage
+        onOpenPST={handleUpload}
+        onOpenMSG={handleOpenMSG}
+        uploading={uploading || msgLoading}
+        progress={uploading ? uploadProgress : msgProgress}
       />
     );
   }
@@ -126,16 +178,22 @@ function App() {
         <main className="app-main">
           {/* PST Info header */}
           <div className="pst-info-header">
-            <FileText size={20} />
-            <div className="pst-info-text">
-              <span className="pst-filename">{pstInfo?.fileName || 'No file loaded'}</span>
-              {pstInfo && (
-                <span className="pst-stats">
-                  <Mail size={14} />
-                  {pstInfo.totalEmails} emails · {pstInfo.totalFolders} folders
-                </span>
-              )}
+            <div className="pst-info-left">
+              <FileText size={20} />
+              <div className="pst-info-text">
+                <span className="pst-filename">{pstInfo?.fileName || 'No file loaded'}</span>
+                {pstInfo && (
+                  <span className="pst-stats">
+                    <Mail size={14} />
+                    {pstInfo.totalEmails} emails · {pstInfo.totalFolders} folders
+                  </span>
+                )}
+              </div>
             </div>
+            <button className="btn-close-archive" onClick={handleReturnHome} title="Close archive and return home">
+              <Home size={18} />
+              Close Archive
+            </button>
           </div>
 
           {/* Advanced Search */}

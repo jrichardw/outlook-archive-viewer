@@ -5,6 +5,7 @@ import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
 import fs from 'fs';
 import pstRoutes from './routes/pst.routes.js';
+import msgRoutes from './routes/msg.routes.js';
 import config from './config/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -26,6 +27,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Routes
 app.use('/api/pst', pstRoutes);
+app.use('/api/msg', msgRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {
