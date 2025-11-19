@@ -118,6 +118,13 @@
   flex-shrink: 0;
 }
 
+.pst-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn-return-home,
 .btn-close-archive,
 .btn-home {
   display: inline-flex;
@@ -134,13 +141,25 @@
   transition: all 0.2s ease;
 }
 
-.btn-close-archive:hover,
+.btn-return-home:hover,
 .btn-home:hover {
   background: var(--background);
   color: var(--text-primary);
   border-color: var(--primary-color);
 }
 
+.btn-close-archive {
+  background: var(--surface);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.btn-close-archive:hover {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-return-home svg,
 .btn-close-archive svg,
 .btn-home svg {
   flex-shrink: 0;

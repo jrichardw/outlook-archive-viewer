@@ -16,6 +16,7 @@ function App() {
   const [msgLoading, setMsgLoading] = useState(false);
   const [msgProgress, setMsgProgress] = useState(0);
   const [hasSavedPST, setHasSavedPST] = useState(false);
+  const [showLandingPage, setShowLandingPage] = useState(false);
   const {
     fileId,
     pstInfo,
@@ -55,6 +56,7 @@ function App() {
   const handleUpload = async (file) => {
     try {
       await uploadPST(file);
+      setShowLandingPage(false); // Navigate to PST viewer after upload
     } catch (err) {
       console.error('Upload failed:', err);
     }
@@ -118,15 +120,22 @@ function App() {
   };
 
   const handleReturnHome = () => {
+    // Just go back to landing page, keep PST loaded
+    setShowLandingPage(true);
+    setMsgEmail(null);
+  };
+
+  const handleClosePST = () => {
+    // Actually close/unload the PST
     closePST();
     setMsgEmail(null);
     setHasSavedPST(false);
+    setShowLandingPage(true);
   };
 
   const handleGoToExistingPST = () => {
-    // The usePST hook will automatically restore the PST from localStorage
-    // We just need to trigger a reload by setting a flag or refreshing
-    window.location.reload();
+    // PST is already loaded in state, just navigate to it
+    setShowLandingPage(false);
   };
 
   // Show MSG viewer if MSG file is loaded
@@ -147,8 +156,8 @@ function App() {
     );
   }
 
-  // Show landing page if no file is loaded
-  if (!fileId) {
+  // Show landing page if no PST is loaded OR if user clicked "Return Home"
+  if (!fileId || showLandingPage) {
     return (
       <LandingPage
         onOpenPST={handleUpload}
@@ -156,7 +165,7 @@ function App() {
         onGoToExistingPST={handleGoToExistingPST}
         uploading={uploading || msgLoading}
         progress={uploading ? uploadProgress : msgProgress}
-        hasSavedPST={hasSavedPST}
+        hasSavedPST={fileId ? true : hasSavedPST}
       />
     );
   }
@@ -206,10 +215,16 @@ function App() {
                 )}
               </div>
             </div>
-            <button className="btn-close-archive" onClick={handleReturnHome} title="Return to home">
-              <ArrowLeft size={18} />
-              Return Home
-            </button>
+            <div className="pst-header-actions">
+              <button className="btn-return-home" onClick={handleReturnHome} title="Return to home page">
+                <ArrowLeft size={18} />
+                Return Home
+              </button>
+              <button className="btn-close-archive" onClick={handleClosePST} title="Close archive and clear from storage">
+                <X size={18} />
+                Close Archive
+              </button>
+            </div>
           </div>
 
           {/* Advanced Search */}
