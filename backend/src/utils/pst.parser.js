@@ -19,8 +19,13 @@ export async function parsePSTFile(filePath) {
       function processFolder(folder, parentPath = '') {
         const folderPath = parentPath ? `${parentPath}/${folder.displayName}` : folder.displayName;
 
+        // Convert Long to number if needed
+        const folderId = folder.descriptorNodeId?.toNumber
+          ? folder.descriptorNodeId.toNumber()
+          : folder.descriptorNodeId || folders.length;
+
         const folderData = {
-          id: folder.descriptorNodeId || folders.length,
+          id: folderId,
           name: folder.displayName,
           path: folderPath,
           contentCount: folder.contentCount || 0,
@@ -31,7 +36,7 @@ export async function parsePSTFile(filePath) {
         folders.push(folderData);
 
         // Process emails in this folder
-        if (folder.contentCount > 0) {
+        if (folder.emailCount > 0) {
           try {
             let email = folder.getNextChild();
             while (email) {
@@ -53,9 +58,9 @@ export async function parsePSTFile(filePath) {
                   messageClass: email.messageClass || '',
                   body: email.body || '',
                   bodyHTML: email.bodyHTML || '',
-                  size: email.messageSize || 0,
+                  size: 0,
                   conversationTopic: email.conversationTopic || '',
-                  internetMessageId: email.internetMessageId || '',
+                  internetMessageId: '',
                   // Attachment details
                   attachments: []
                 };
@@ -90,14 +95,13 @@ export async function parsePSTFile(filePath) {
           }
         }
 
-        // Process subfolders recursively
+        // Process subfolders recursively using getSubFolders()
         if (folder.hasSubfolders) {
           try {
-            let subFolder = folder.getNextSubFolder();
-            while (subFolder) {
+            const subFolders = folder.getSubFolders();
+            for (const subFolder of subFolders) {
               const childData = processFolder(subFolder, folderPath);
               folderData.children.push(childData);
-              subFolder = folder.getNextSubFolder();
             }
           } catch (subErr) {
             console.warn('Error processing subfolders:', subErr.message);
