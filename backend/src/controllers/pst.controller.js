@@ -17,9 +17,17 @@ export async function uploadPST(req, res, next) {
 
     console.log(`📥 Processing PST file: ${req.file.originalname}`);
     console.log(`   Size: ${(req.file.size / 1024 / 1024).toFixed(2)} MB`);
+    console.log(`   Path: ${filePath}`);
+    console.log(`⏳ Starting PST parsing... (this may take several minutes for large files)`);
+
+    const startTime = Date.now();
 
     // Parse the PST file
     const parsedData = await parsePSTFile(filePath);
+
+    const endTime = Date.now();
+    const duration = ((endTime - startTime) / 1000).toFixed(2);
+    console.log(`⏱️  Parsing completed in ${duration} seconds`);
 
     // Store in cache
     pstCache.set(fileId, {
@@ -43,14 +51,23 @@ export async function uploadPST(req, res, next) {
     });
 
   } catch (error) {
-    console.error('Error processing PST file:', error);
+    console.error('❌ Error processing PST file:', error);
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      file: req.file ? req.file.originalname : 'unknown'
+    });
 
     // Clean up file if it exists
     if (req.file) {
       deletePSTFile(req.file.path);
     }
 
-    next(error);
+    // Send more detailed error response
+    res.status(500).json({
+      error: `Failed to process PST file: ${error.message}`,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 }
 

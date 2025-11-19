@@ -6,7 +6,8 @@ const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  timeout: 1800000 // 30 minute timeout for large file processing
 });
 
 export const pstApi = {
@@ -21,6 +22,7 @@ export const pstApi = {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
+      timeout: 1800000, // 30 minute timeout for large files
       onUploadProgress: (progressEvent) => {
         if (onProgress && progressEvent.total) {
           const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);

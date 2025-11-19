@@ -118,14 +118,20 @@ export default function FileUpload({ onUpload, uploading, progress }) {
           ) : (
             <div className="upload-progress">
               <div className="spinner"></div>
-              <p className="progress-text">Uploading and processing...</p>
+              <p className="progress-text">
+                {progress < 100
+                  ? 'Uploading PST file...'
+                  : 'Processing PST file... (this may take several minutes for large files)'}
+              </p>
               <div className="progress-bar">
                 <div
                   className="progress-fill"
                   style={{ width: `${progress}%` }}
                 ></div>
               </div>
-              <p className="progress-percentage">{progress}%</p>
+              <p className="progress-percentage">
+                {progress < 100 ? `${progress}%` : 'Parsing emails...'}
+              </p>
             </div>
           )}
         </form>
