@@ -19,12 +19,21 @@ const storage = multer.diskStorage({
   }
 });
 
-// File filter - only accept .pst files
-const fileFilter = (req, file, cb) => {
+// File filter for PST files
+const pstFileFilter = (req, file, cb) => {
   if (file.originalname.toLowerCase().endsWith('.pst')) {
     cb(null, true);
   } else {
     cb(new Error('Only .pst files are allowed'), false);
+  }
+};
+
+// File filter for MSG files
+const msgFileFilter = (req, file, cb) => {
+  if (file.originalname.toLowerCase().endsWith('.msg')) {
+    cb(null, true);
+  } else {
+    cb(new Error('Only .msg files are allowed'), false);
   }
 };
 
@@ -33,13 +42,26 @@ const fileSizeLimit = config.maxFileSizeMB === 0
   ? Infinity
   : config.maxFileSizeMB * 1024 * 1024;
 
-// Configure multer
-const upload = multer({
+// Configure multer for PST files
+const pstUpload = multer({
   storage: storage,
-  fileFilter: fileFilter,
+  fileFilter: pstFileFilter,
   limits: {
     fileSize: fileSizeLimit
   }
 });
 
-export default upload;
+// Configure multer for MSG files (smaller size limit)
+const msgUpload = multer({
+  storage: storage,
+  fileFilter: msgFileFilter,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB limit for MSG files
+  }
+});
+
+// Default export for PST (backward compatibility)
+export default pstUpload;
+
+// Named exports
+export { pstUpload, msgUpload };

@@ -1,10 +1,10 @@
 import express from 'express';
 import { uploadMSG } from '../controllers/msg.controller.js';
-import upload from '../middleware/upload.js';
+import { msgUpload } from '../middleware/upload.js';
 
 const router = express.Router();
 
 // Upload and parse MSG file
-router.post('/upload', upload.single('file'), uploadMSG);
+router.post('/upload', msgUpload.single('file'), uploadMSG);
 
 export default router;
