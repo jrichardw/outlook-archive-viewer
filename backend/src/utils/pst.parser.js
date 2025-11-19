@@ -1,5 +1,8 @@
-import { PSTFile } from 'pst-extractor';
+import { createRequire } from 'module';
 import fs from 'fs';
+
+const require = createRequire(import.meta.url);
+const { PSTFile } = require('pst-extractor');
 
 /**
  * Extract folder structure and emails from PST file
