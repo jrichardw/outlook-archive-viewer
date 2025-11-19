@@ -13,23 +13,28 @@ export default function AdvancedSearch({ onSearch }) {
     hasAttachments: ''
   });
 
-  const handleSimpleSearch = (e) => {
-    e.preventDefault();
-    onSearch({ query: searchQuery, filters: {} });
-  };
-
-  const handleAdvancedSearch = (e) => {
+  const handleSearch = (e) => {
     e.preventDefault();
 
-    // Build advanced query
+    // Parse query for filter syntax if contains colons
+    let finalQuery = searchQuery;
+    let finalFilters = { ...filters };
+
+    if (searchQuery.includes(':')) {
+      const parsed = parseAdvancedQueryForSearch(searchQuery);
+      finalQuery = parsed.query;
+      finalFilters = { ...finalFilters, ...parsed.filters };
+    }
+
+    // Build active filters
     const activeFilters = {};
-    if (filters.from) activeFilters.from = filters.from;
-    if (filters.to) activeFilters.to = filters.to;
-    if (filters.subject) activeFilters.subject = filters.subject;
-    if (filters.body) activeFilters.body = filters.body;
-    if (filters.hasAttachments) activeFilters.hasAttachments = filters.hasAttachments === 'yes';
+    if (finalFilters.from) activeFilters.from = finalFilters.from;
+    if (finalFilters.to) activeFilters.to = finalFilters.to;
+    if (finalFilters.subject) activeFilters.subject = finalFilters.subject;
+    if (finalFilters.body) activeFilters.body = finalFilters.body;
+    if (finalFilters.hasAttachments) activeFilters.hasAttachments = finalFilters.hasAttachments === 'yes';
 
-    onSearch({ query: searchQuery, filters: activeFilters });
+    onSearch({ query: finalQuery, filters: activeFilters });
   };
 
   const handleClear = () => {
@@ -44,47 +49,41 @@ export default function AdvancedSearch({ onSearch }) {
     onSearch({ query: '', filters: {} });
   };
 
-  const parseAdvancedQuery = (query) => {
+  const parseAdvancedQueryForSearch = (query) => {
     // Parse queries like "from:john subject:meeting"
     const parts = query.match(/(\w+):([^\s]+)|([^\s:]+)/g) || [];
-    const newFilters = { ...filters };
+    const parsedFilters = {};
     let remainingQuery = '';
 
     parts.forEach(part => {
       if (part.includes(':')) {
         const [key, value] = part.split(':');
-        if (key === 'from') newFilters.from = value;
-        else if (key === 'to') newFilters.to = value;
-        else if (key === 'subject') newFilters.subject = value;
-        else if (key === 'body' || key === 'content') newFilters.body = value;
-        else if (key === 'has' && value === 'attachments') newFilters.hasAttachments = 'yes';
+        if (key === 'from') parsedFilters.from = value;
+        else if (key === 'to') parsedFilters.to = value;
+        else if (key === 'subject') parsedFilters.subject = value;
+        else if (key === 'body' || key === 'content') parsedFilters.body = value;
+        else if (key === 'has' && value === 'attachments') parsedFilters.hasAttachments = 'yes';
       } else {
         remainingQuery += part + ' ';
       }
     });
 
-    setFilters(newFilters);
-    setSearchQuery(remainingQuery.trim());
-  };
-
-  const handleQueryChange = (value) => {
-    setSearchQuery(value);
-    // Auto-parse if contains colons
-    if (value.includes(':')) {
-      parseAdvancedQuery(value);
-    }
+    return {
+      filters: parsedFilters,
+      query: remainingQuery.trim()
+    };
   };
 
   return (
     <div className="advanced-search">
-      <form onSubmit={showAdvanced ? handleAdvancedSearch : handleSimpleSearch} className="search-form">
+      <form onSubmit={handleSearch} className="search-form">
         <div className="search-input-wrapper">
           <Search className="search-icon" size={20} />
           <input
             type="text"
             placeholder="Search or use filters (e.g., from:john subject:report)"
             value={searchQuery}
-            onChange={(e) => handleQueryChange(e.target.value)}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="search-input"
           />
           {(searchQuery || Object.values(filters).some(v => v)) && (
@@ -174,7 +173,7 @@ export default function AdvancedSearch({ onSearch }) {
             <button type="button" className="btn-secondary" onClick={handleClear}>
               Clear All
             </button>
-            <button type="button" className="btn-primary" onClick={handleAdvancedSearch}>
+            <button type="button" className="btn-primary" onClick={(e) => handleSearch(e)}>
               Apply Filters
             </button>
           </div>
