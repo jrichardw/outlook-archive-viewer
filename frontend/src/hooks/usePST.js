@@ -11,6 +11,10 @@ export function usePST() {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState(null);
+  const [currentFilters, setCurrentFilters] = useState({
+    folderId: null,
+    search: ''
+  });
   const [pagination, setPagination] = useState({
     total: 0,
     page: 1,
@@ -92,8 +96,10 @@ export function usePST() {
       setLoading(true);
       setError(null);
 
-      const params = { search: searchTerm, page: 1, limit: 50 };
+      const params = { search: searchTerm, page: 1, limit: pagination.limit };
       if (folderId) params.folderId = folderId;
+
+      setCurrentFilters({ search: searchTerm, folderId });
 
       const data = await pstApi.getEmails(fileId, params);
       setEmails(data.emails);
@@ -103,7 +109,7 @@ export function usePST() {
       setError(err.response?.data?.error || err.message || 'Failed to search emails');
       setLoading(false);
     }
-  }, [fileId]);
+  }, [fileId, pagination.limit]);
 
   const filterByFolder = useCallback(async (folderId) => {
     if (!fileId) return;
@@ -112,7 +118,9 @@ export function usePST() {
       setLoading(true);
       setError(null);
 
-      const data = await pstApi.getEmails(fileId, { folderId, page: 1, limit: 50 });
+      setCurrentFilters({ folderId, search: '' });
+
+      const data = await pstApi.getEmails(fileId, { folderId, page: 1, limit: pagination.limit });
       setEmails(data.emails);
       setPagination(data.pagination);
       setLoading(false);
@@ -120,7 +128,67 @@ export function usePST() {
       setError(err.response?.data?.error || err.message || 'Failed to filter emails');
       setLoading(false);
     }
-  }, [fileId]);
+  }, [fileId, pagination.limit]);
+
+  const changePage = useCallback(async (newPage) => {
+    if (!fileId) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = {
+        page: newPage,
+        limit: pagination.limit
+      };
+
+      if (currentFilters.folderId) {
+        params.folderId = currentFilters.folderId;
+      }
+
+      if (currentFilters.search) {
+        params.search = currentFilters.search;
+      }
+
+      const data = await pstApi.getEmails(fileId, params);
+      setEmails(data.emails);
+      setPagination(data.pagination);
+      setLoading(false);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || 'Failed to load emails');
+      setLoading(false);
+    }
+  }, [fileId, pagination.limit, currentFilters]);
+
+  const changePageSize = useCallback(async (newLimit) => {
+    if (!fileId) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = {
+        page: 1, // Reset to first page when changing page size
+        limit: newLimit
+      };
+
+      if (currentFilters.folderId) {
+        params.folderId = currentFilters.folderId;
+      }
+
+      if (currentFilters.search) {
+        params.search = currentFilters.search;
+      }
+
+      const data = await pstApi.getEmails(fileId, params);
+      setEmails(data.emails);
+      setPagination(data.pagination);
+      setLoading(false);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || 'Failed to load emails');
+      setLoading(false);
+    }
+  }, [fileId, currentFilters]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -142,6 +210,8 @@ export function usePST() {
     loadEmailById,
     searchEmails,
     filterByFolder,
+    changePage,
+    changePageSize,
     clearError,
     setCurrentEmail
   };

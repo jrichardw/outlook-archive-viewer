@@ -5,6 +5,7 @@ import SearchBar from './components/SearchBar';
 import FolderTree from './components/FolderTree';
 import EmailList from './components/EmailList';
 import EmailViewer from './components/EmailViewer';
+import Pagination from './components/Pagination';
 import { AlertCircle, X } from 'lucide-react';
 import './App.css';
 
@@ -19,11 +20,14 @@ function App() {
     uploading,
     uploadProgress,
     error,
+    pagination,
     uploadPST,
     searchEmails,
     filterByFolder,
     loadEmailById,
     loadEmails,
+    changePage,
+    changePageSize,
     clearError,
     setCurrentEmail
   } = usePST();
@@ -142,6 +146,16 @@ function App() {
                 loading={loading}
                 currentFolder={selectedFolderName}
               />
+
+              {/* Pagination controls */}
+              {emails.length > 0 && (
+                <Pagination
+                  pagination={pagination}
+                  onPageChange={changePage}
+                  onPageSizeChange={changePageSize}
+                  loading={loading}
+                />
+              )}
             </div>
 
             {/* Email viewer */}

@@ -75,6 +75,9 @@
 .email-list-panel {
   width: 100%;
   transition: width 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .email-list-panel.with-viewer {
