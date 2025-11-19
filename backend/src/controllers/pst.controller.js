@@ -92,12 +92,31 @@ export function getFolders(req, res) {
  * Get emails from specific folder or all emails
  */
 export function getEmails(req, res) {
-  const { fileId } = req.params;
-  const { folderId, search, page = 1, limit = 50 } = req.query;
+  const {
+    fileId
+  } = req.params;
+  const {
+    folderId,
+    search,
+    // Advanced search filters
+    from,
+    to,
+    subject,
+    body,
+    hasAttachments,
+    // Sorting
+    sortBy = 'date',
+    sortDirection = 'newest',
+    // Pagination
+    page = 1,
+    limit = 50
+  } = req.query;
 
   const data = pstCache.get(fileId);
   if (!data) {
-    return res.status(404).json({ error: 'PST file not found. Please upload again.' });
+    return res.status(404).json({
+      error: 'PST file not found. Please upload again.'
+    });
   }
 
   let emails = data.emails;
@@ -107,15 +126,99 @@ export function getEmails(req, res) {
     emails = emails.filter(email => email.folderId == folderId);
   }
 
-  // Search functionality
-  if (search) {
+  // Advanced search filters
+  if (from) {
+    const fromLower = from.toLowerCase();
+    emails = emails.filter(email =>
+      email.senderName.toLowerCase().includes(fromLower) ||
+      email.senderEmail.toLowerCase().includes(fromLower)
+    );
+  }
+
+  if (to) {
+    const toLower = to.toLowerCase();
+    emails = emails.filter(email =>
+      email.recipients.toLowerCase().includes(toLower)
+    );
+  }
+
+  if (subject) {
+    const subjectLower = subject.toLowerCase();
+    emails = emails.filter(email =>
+      email.subject.toLowerCase().includes(subjectLower)
+    );
+  }
+
+  if (body) {
+    const bodyLower = body.toLowerCase();
+    emails = emails.filter(email =>
+      email.body.toLowerCase().includes(bodyLower) ||
+      email.bodyHTML.toLowerCase().includes(bodyLower)
+    );
+  }
+
+  if (hasAttachments !== undefined) {
+    const wantsAttachments = hasAttachments === 'true';
+    emails = emails.filter(email => email.hasAttachments === wantsAttachments);
+  }
+
+  // Basic search (searches all fields if no advanced filters)
+  if (search && !from && !to && !subject && !body) {
     const searchLower = search.toLowerCase();
     emails = emails.filter(email =>
       email.subject.toLowerCase().includes(searchLower) ||
       email.senderName.toLowerCase().includes(searchLower) ||
       email.senderEmail.toLowerCase().includes(searchLower) ||
+      email.recipients.toLowerCase().includes(searchLower) ||
       email.body.toLowerCase().includes(searchLower)
     );
+  }
+
+  // Sorting
+  emails = [...emails]; // Create copy to avoid mutating original
+
+  switch (sortBy) {
+    case 'date':
+      emails.sort((a, b) => {
+        const dateA = new Date(a.receivedTime || a.sentTime || 0);
+        const dateB = new Date(b.receivedTime || b.sentTime || 0);
+        return sortDirection === 'newest' ? dateB - dateA : dateA - dateB;
+      });
+      break;
+
+    case 'from':
+      emails.sort((a, b) => {
+        const comparison = a.senderName.localeCompare(b.senderName);
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
+      break;
+
+    case 'subject':
+      emails.sort((a, b) => {
+        const comparison = a.subject.localeCompare(b.subject);
+        return sortDirection === 'asc' ? comparison : -comparison;
+      });
+      break;
+
+    case 'size':
+      emails.sort((a, b) => {
+        return sortDirection === 'largest' ? (b.size || 0) - (a.size || 0) : (a.size || 0) - (b.size || 0);
+      });
+      break;
+
+    case 'importance':
+      emails.sort((a, b) => {
+        return sortDirection === 'high' ? (b.importance || 0) - (a.importance || 0) : (a.importance || 0) - (b.importance || 0);
+      });
+      break;
+
+    default:
+      // Default to date sort
+      emails.sort((a, b) => {
+        const dateA = new Date(a.receivedTime || a.sentTime || 0);
+        const dateB = new Date(b.receivedTime || b.sentTime || 0);
+        return dateB - dateA;
+      });
   }
 
   // Pagination

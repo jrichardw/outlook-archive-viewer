@@ -66,6 +66,49 @@
   background: var(--background);
 }
 
+.pst-info-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text-secondary);
+}
+
+.pst-info-header svg {
+  flex-shrink: 0;
+  color: var(--primary-color);
+}
+
+.pst-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pst-filename {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pst-stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.pst-stats svg {
+  flex-shrink: 0;
+}
+
 .app-content {
   flex: 1;
   display: flex;

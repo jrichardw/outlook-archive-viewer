@@ -1,0 +1,80 @@
+.sort-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.sort-icon {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+}
+
+.sort-selector,
+.sort-direction {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sort-selector label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.sort-select {
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--background);
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sort-select:hover {
+  border-color: var(--primary-color);
+}
+
+.sort-select:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+.sort-indicator {
+  display: flex;
+  align-items: center;
+  color: var(--primary-color);
+  margin-left: auto;
+}
+
+@media (max-width: 768px) {
+  .sort-controls {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 16px;
+  }
+
+  .sort-selector label {
+    display: none;
+  }
+
+  .sort-direction {
+    flex: 1;
+  }
+
+  .sort-select {
+    width: 100%;
+  }
+
+  .sort-indicator {
+    margin-left: 0;
+  }
+}

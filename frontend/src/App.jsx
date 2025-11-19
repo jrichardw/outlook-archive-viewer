@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { usePST } from './hooks/usePST';
 import FileUpload from './components/FileUpload';
-import SearchBar from './components/SearchBar';
+import AdvancedSearch from './components/AdvancedSearch';
+import SortControls from './components/SortControls';
 import FolderTree from './components/FolderTree';
 import EmailList from './components/EmailList';
 import EmailViewer from './components/EmailViewer';
 import Pagination from './components/Pagination';
-import { AlertCircle, X } from 'lucide-react';
+import { AlertCircle, X, FileText, Mail } from 'lucide-react';
 import './App.css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
     uploadProgress,
     error,
     pagination,
+    currentSort,
     uploadPST,
     searchEmails,
     filterByFolder,
@@ -28,6 +30,7 @@ function App() {
     loadEmails,
     changePage,
     changePageSize,
+    changeSort,
     clearError,
     setCurrentEmail
   } = usePST();
@@ -45,24 +48,13 @@ function App() {
     }
   };
 
-  const handleSearch = (term) => {
-    setSearchTerm(term);
-    if (term.trim()) {
-      searchEmails(term, selectedFolderId);
-    } else {
-      // If search is cleared, reload based on current folder
-      if (selectedFolderId) {
-        filterByFolder(selectedFolderId);
-      } else {
-        loadEmails();
-      }
-    }
+  const handleSearch = (searchParams) => {
+    searchEmails(searchParams);
   };
 
   const handleSelectFolder = (folderId, folderName) => {
     setSelectedFolderId(folderId);
     setSelectedFolderName(folderName);
-    setSearchTerm('');
     filterByFolder(folderId);
     setCurrentEmail(null);
     setShowEmailViewer(false);
@@ -71,10 +63,13 @@ function App() {
   const handleShowAllEmails = () => {
     setSelectedFolderId(null);
     setSelectedFolderName(null);
-    setSearchTerm('');
     loadEmails();
     setCurrentEmail(null);
     setShowEmailViewer(false);
+  };
+
+  const handleSortChange = (sortBy, sortDirection) => {
+    changeSort(sortBy, sortDirection);
   };
 
   const handleSelectEmail = (email) => {
@@ -129,10 +124,28 @@ function App() {
 
         {/* Main content area */}
         <main className="app-main">
-          {/* Search bar */}
-          <SearchBar
-            onSearch={handleSearch}
-            pstInfo={pstInfo}
+          {/* PST Info header */}
+          <div className="pst-info-header">
+            <FileText size={20} />
+            <div className="pst-info-text">
+              <span className="pst-filename">{pstInfo?.fileName || 'No file loaded'}</span>
+              {pstInfo && (
+                <span className="pst-stats">
+                  <Mail size={14} />
+                  {pstInfo.totalEmails} emails · {pstInfo.totalFolders} folders
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Advanced Search */}
+          <AdvancedSearch onSearch={handleSearch} />
+
+          {/* Sort Controls */}
+          <SortControls
+            sortBy={currentSort.sortBy}
+            sortDirection={currentSort.sortDirection}
+            onSortChange={handleSortChange}
           />
 
           {/* Content area with email list and viewer */}
