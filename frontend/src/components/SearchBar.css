@@ -1,0 +1,137 @@
+.search-bar-container {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-light);
+  padding: 16px 20px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.search-bar-header {
+  margin-bottom: 12px;
+}
+
+.pst-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-secondary);
+}
+
+.pst-info svg {
+  flex-shrink: 0;
+  color: var(--primary-color);
+}
+
+.pst-info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pst-filename {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pst-stats {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.pst-stats svg {
+  flex-shrink: 0;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--background);
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 16px;
+  transition: all 0.2s ease;
+}
+
+.search-bar.focused {
+  border-color: var(--primary-color);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.search-icon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.search-bar.focused .search-icon {
+  color: var(--primary-color);
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 15px;
+  color: var(--text-primary);
+  font-family: inherit;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.search-clear {
+  background: var(--border-light);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.search-clear:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
+@media (max-width: 768px) {
+  .search-bar-container {
+    padding: 12px 16px;
+  }
+
+  .pst-filename {
+    font-size: 14px;
+  }
+
+  .pst-stats {
+    font-size: 12px;
+  }
+
+  .search-bar {
+    padding: 8px 12px;
+  }
+
+  .search-input {
+    font-size: 14px;
+  }
+
+  .search-input::placeholder {
+    font-size: 14px;
+  }
+}

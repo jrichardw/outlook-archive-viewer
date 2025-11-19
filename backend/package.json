@@ -1,0 +1,24 @@
+{
+  "name": "outlook-archive-viewer-backend",
+  "version": "1.0.0",
+  "description": "Backend server for Outlook Archive Viewer",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": ["outlook", "pst", "email", "archive"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "pst-extractor": "^1.0.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
