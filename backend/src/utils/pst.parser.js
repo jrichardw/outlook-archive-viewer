@@ -1,4 +1,4 @@
-import PSTFile from 'pst-extractor';
+import { PSTFile } from 'pst-extractor';
 import fs from 'fs';
 
 /**
