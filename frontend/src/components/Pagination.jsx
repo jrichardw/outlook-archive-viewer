@@ -10,6 +10,8 @@ export default function Pagination({
 }) {
   const { page, totalPages, total, limit } = pagination;
 
+  console.log('🔍 Pagination component rendering:', { page, totalPages, total, limit, pagination });
+
   const pageSizeOptions = [50, 100, 500];
 
   const handlePrevious = () => {
@@ -29,7 +31,12 @@ export default function Pagination({
     onPageSizeChange(newLimit);
   };
 
-  if (total === 0) return null;
+  if (total === 0) {
+    console.log('❌ Pagination NOT rendering - total is 0');
+    return null;
+  }
+
+  console.log('✅ Pagination IS rendering - total:', total);
 
   const startItem = (page - 1) * limit + 1;
   const endItem = Math.min(page * limit, total);
